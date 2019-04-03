@@ -47,12 +47,14 @@ module.exports = {
 			res.status(401).json({ message: 'No token provided' });
 		}
 	},
+
 	typeCoercion: function(req, res, next) {
 		if (req.body.duration) {
 			req.body.duration = parseInt(req.body.duration, 10);
 		}
 		next();
 	},
+
 	hasCorrectKeys: function(req, res, next) {
 		const { error: err } = tripSchema.validate(req.body, { stripUnknown: true });
 		if (err) {
@@ -62,6 +64,7 @@ module.exports = {
 		}
 		next();
 	},
+
 	registerCheck: function(req, res, next) {
 		const { error: err } = registerSchema.validate(req.body, { stripUnknown: true });
 		if (err) {
@@ -71,6 +74,7 @@ module.exports = {
 		}
 		next();
 	},
+
 	checkDesignation: function(req, res, next) {
 		if (req.body.designation) {
 			const { designation } = req.body;

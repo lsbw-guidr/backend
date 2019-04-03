@@ -4,20 +4,26 @@ const db = require('../../data/dbConfig');
 
 module.exports = {
 	register: function(user) {
-		if (process.env.NODE_ENV === 'testing') {
-			return db('guides').insert(user);
-		} else {
-			return db('guides').insert(user, 'id');
-		}
+		return process.env.NODE_ENV === 'production'
+			? db('guides').insert(user, 'id')
+			: db('guides').insert(user);
+		// if (process.env.NODE_ENV === 'testing') {
+		// 	return db('guides').insert(user);
+		// } else {
+		// 	return db('guides').insert(user, 'id');
+		// }
 	},
-	login: function(user) {
+
+	login: function({ username }) {
 		return db('guides')
-			.where({ username: user.username })
+			.where({ username })
 			.first();
 	},
+
 	hashPass: function(password, saltNum) {
 		return bcrypt.hashSync(password, saltNum);
 	},
+
 	generateToken: function(user) {
 		const secret = process.env.JWT_SECRET;
 		const payload = { guide: user };
@@ -25,14 +31,17 @@ module.exports = {
 			expiresIn: '72h',
 			jwtid: 'guidr'
 		};
+
 		return jwt.sign(payload, secret, options);
 	},
+
 	decodeToken: function(token, callback) {
 		const secret = process.env.JWT_SECRET;
 		const options = {
 			expiresIn: '72h',
 			jwtid: 'guidr'
 		};
+
 		if (callback) {
 			return jwt.verify(token, secret, options, callback);
 		} else {
