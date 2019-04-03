@@ -2,7 +2,7 @@
 
 ### **_Deployed API_**
 
-`https://guidr-api.herokuapp.com`
+`https://guidrapi.herokuapp.com`
 
 ## **PUBLIC ROUTES**
 
