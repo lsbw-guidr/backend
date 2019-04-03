@@ -64,7 +64,7 @@ describe('helper function tests', () => {
 		});
 
 		it('should generate jwtToken', async () => {
-			const secret = process.env.JWT_SECRET || 'beep boop';
+			const secret = process.env.JWT_SECRET;
 			const testGuide = {
 				username: 'testerrrr'
 			};
@@ -84,7 +84,7 @@ describe('helper function tests', () => {
 		});
 
 		it('should verify token', async () => {
-			const secret = process.env.JWT_SECRET || 'beep boop';
+			const secret = process.env.JWT_SECRET;
 			const testGuide = {
 				username: 'testerrrr'
 			};

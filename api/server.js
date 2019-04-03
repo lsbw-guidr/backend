@@ -11,9 +11,9 @@ const errorHandler = require('./helpers/errorHandler');
 
 const server = express();
 
-server.get('/', (req, res) => {
-	res.status(200).send('Sanity Check, API running');
-});
+// server.get('/', (req, res) => {
+// 	res.status(200).send('Sanity Check, API running');
+// });
 
 server.use(express.json());
 server.use(helmet());
