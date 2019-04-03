@@ -35,7 +35,6 @@ router.get('/all', async ({ decodedToken }, res, next) => {
 });
 
 router.get('/:tripId', async ({ trip, decodedToken }, res, next) => {
-	// const { trip } = req;
 	const { guide } = decodedToken;
 
 	try {
@@ -52,7 +51,7 @@ router.put('/:tripId', typeCoercion, async ({ trip, body, decodedToken }, res, n
 	const updates = body;
 
 	try {
-		if (req.trip.guide_id !== guide.id) {
+		if (trip.guide_id !== guide.id) {
 			next({ status: 400, message: "You must be the trip's guide to make changes" }, res);
 		}
 		const success = await updateTrip(trip.id, updates);
@@ -62,30 +61,33 @@ router.put('/:tripId', typeCoercion, async ({ trip, body, decodedToken }, res, n
 	}
 });
 
-router.post('/:tripId/upload', async (req, res, next) => {
-	const image = req.body;
-
+router.post('/:tripId/upload', async ({ body, trip }, res, next) => {
 	try {
-		const id = await addImage({ ...image, trip_id: req.trip.id });
+		const id = await addImage({ ...body, trip_id: trip.id });
 		res.status(201).json(id);
 	} catch (err) {
 		next({ message: err }, res);
 	}
 });
 
-router.post('/create', hasCorrectKeys, typeCoercion, checkDesignation, async (req, res, next) => {
-	const { guide } = req.decodedToken;
-	const tripInfo = req.body;
-	try {
-		const tripId = await createTrip({ ...tripInfo, guide_id: guide.id });
-		res.status(201).json(tripId);
-	} catch (err) {
-		next({ message: err }, res);
-	}
-});
+router.post(
+	'/create',
+	hasCorrectKeys,
+	typeCoercion,
+	checkDesignation,
+	async ({ decodedToken, body }, res, next) => {
+		const { guide } = decodedToken;
 
-router.delete('/:id', async (req, res, next) => {
-	const { id } = req.params;
+		try {
+			const tripId = await createTrip({ ...body, guide_id: guide.id });
+			res.status(201).json(tripId);
+		} catch (err) {
+			next({ message: err }, res);
+		}
+	}
+);
+
+router.delete('/:id', async ({ params: { id } }, res, next) => {
 	try {
 		const numberRemoved = await deleteTrip(id);
 		if (numberRemoved === 0) {
