@@ -22,25 +22,23 @@ router.param('tripId', async function(req, res, next, tripId) {
 	}
 });
 
-router.get('/all', async ({ decodedToken }, res, next) => {
-	const { guide } = decodedToken;
-
+router.get('/all', async ({ decodedToken: { guide } }, res, next) => {
 	try {
 		const trips = await getTripsByUser(guide.id);
-		if (trips.length === 0) return res.status(404).json(trips);
+		// if (trips.length === 0) return res.status(404).json(trips);
 		res.status(200).json(trips);
 	} catch (err) {
 		next({ message: err }, res);
 	}
 });
 
-router.get('/:tripId', async ({ trip, decodedToken }, res, next) => {
-	const { guide } = decodedToken;
-
+router.get('/:tripId', async ({ trip, decodedToken: { guide } }, res, next) => {
 	try {
-		if (trip.guide_id !== guide.id)
+		if (trip.guide_id !== guide.id) {
 			return next({ status: 400, message: 'That trip is not connected to the specified guide ID' });
-		res.status(200).json(trip);
+		} else {
+			res.status(200).json(trip);
+		}
 	} catch (err) {
 		next({ message: err }, res);
 	}
@@ -48,14 +46,13 @@ router.get('/:tripId', async ({ trip, decodedToken }, res, next) => {
 
 router.put('/:tripId', typeCoercion, async ({ trip, body, decodedToken }, res, next) => {
 	const { guide } = decodedToken;
-	const updates = body;
 
 	try {
 		if (trip.guide_id !== guide.id) {
 			next({ status: 400, message: "You must be the trip's guide to make changes" }, res);
 		}
-		const success = await updateTrip(trip.id, updates);
-		res.status(203).json(success);
+		const success = await updateTrip(trip.id, body);
+		res.status(200).json(success);
 	} catch (err) {
 		next({ message: err }, res);
 	}
