@@ -23,7 +23,8 @@ router.get('/current', async ({ decodedToken }, res, next) => {
 	res.status(200).json(guide);
 });
 
-router.put('/update/:guideId', async (req, res, next) => {
+router.put('/update/current', async (req, res, next) => {
+	// this would be an admin route for updating a user or something
 	const { guideId } = req.params;
 	const info = req.body;
 
