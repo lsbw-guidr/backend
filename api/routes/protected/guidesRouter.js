@@ -3,30 +3,22 @@ const { updateUser, getUserById } = require('../../helpers/guideHelpers');
 
 const router = express.Router();
 
-// router.param('guideId', async function(req, res, next) {
-// 	const { id } = req.decodedToken.user;
-// 	const user = await getUserById(id);
-// 	if (user) {
-// 		req.guideId = user.id;
-// 		console.log(req.guideId, 'router.param guideId');
-// 		next();
-// 	} else {
-// 		next(err);
-// 	}
-// });
-
 router.get('/:guideId', async (req, res, next) => {
 	const { guideId } = req.params;
 	try {
 		const guide = await getUserById(guideId);
-		console.log('get guideId', guide);
-		// console.log('get guide req.guideId', req.guideId);
 		return guide
 			? res.status(200).json(guide)
 			: next({ status: 400, message: 'A guide with that id does not exist' });
 	} catch (err) {
 		next({ message: err }, res);
 	}
+});
+
+router.get('/current', async ({ decodedToken }, res, next) => {
+	const { guide } = decodedToken;
+
+	res.status(200).json(guide);
 });
 
 router.put('/update/:guideId', async (req, res, next) => {
@@ -47,6 +39,13 @@ router.put('/update/:guideId', async (req, res, next) => {
 			next({ message: err }, res);
 		}
 	}
+});
+
+router.put('/update', async ({ decodedToken, body }, res, next) => {
+	const { guide } = decodedToken;
+	const numUpdated = await updateUser(guide.id, body);
+
+	res.status(204).json(numUpdated);
 });
 
 module.exports = router;

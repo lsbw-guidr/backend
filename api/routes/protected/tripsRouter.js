@@ -13,6 +13,7 @@ const router = express.Router();
 
 router.param('tripId', async function(req, res, next, tripId) {
 	const trip = await getById(tripId);
+
 	if (trip) {
 		req.trip = trip;
 		next();
@@ -21,9 +22,9 @@ router.param('tripId', async function(req, res, next, tripId) {
 	}
 });
 
-router.get('/all', async (req, res, next) => {
-	const { guide } = req.decodedToken;
-	console.log(guide, 'guide get all trips');
+router.get('/all', async ({ decodedToken }, res, next) => {
+	const { guide } = decodedToken;
+
 	try {
 		const trips = await getTripsByUser(guide.id);
 		if (trips.length === 0) return res.status(404).json(trips);
@@ -33,9 +34,10 @@ router.get('/all', async (req, res, next) => {
 	}
 });
 
-router.get('/:tripId', async (req, res, next) => {
-	const { trip } = req;
-	const { guide } = req.decodedToken;
+router.get('/:tripId', async ({ trip, decodedToken }, res, next) => {
+	// const { trip } = req;
+	const { guide } = decodedToken;
+
 	try {
 		if (trip.guide_id !== guide.id)
 			return next({ status: 400, message: 'That trip is not connected to the specified guide ID' });
@@ -45,12 +47,12 @@ router.get('/:tripId', async (req, res, next) => {
 	}
 });
 
-router.put('/:tripId', typeCoercion, async (req, res, next) => {
-	const { trip } = req;
-	const { guide } = req.decodedToken;
-	const updates = req.body;
+router.put('/:tripId', typeCoercion, async ({ trip, body, decodedToken }, res, next) => {
+	const { guide } = decodedToken;
+	const updates = body;
+
 	try {
-		if (trip.guide_id !== guide.id) {
+		if (req.trip.guide_id !== guide.id) {
 			next({ status: 400, message: "You must be the trip's guide to make changes" }, res);
 		}
 		const success = await updateTrip(trip.id, updates);
@@ -61,10 +63,10 @@ router.put('/:tripId', typeCoercion, async (req, res, next) => {
 });
 
 router.post('/:tripId/upload', async (req, res, next) => {
-	const { trip } = req;
 	const image = req.body;
+
 	try {
-		const id = await addImage({ ...image, trip_id: trip.id });
+		const id = await addImage({ ...image, trip_id: req.trip.id });
 		res.status(201).json(id);
 	} catch (err) {
 		next({ message: err }, res);
